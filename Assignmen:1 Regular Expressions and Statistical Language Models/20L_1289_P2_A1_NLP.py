@@ -1,3 +1,11 @@
+"""
+    Name: Mohammad Anas
+    Roll Number: 20L-1289
+    Section: BDS-8A
+    Part 2
+    Assignment 1
+"""
+
 
 import os.path
 import sys
