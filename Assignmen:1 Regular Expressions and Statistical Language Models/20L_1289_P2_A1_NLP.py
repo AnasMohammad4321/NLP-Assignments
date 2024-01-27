@@ -6,7 +6,8 @@
     Assignment 1
 """
 
-
+import math
+from collections import Counter
 import os.path
 import sys
 import random
@@ -110,12 +111,13 @@ class LanguageModel:
     # Initialize and train the model (ie, estimate the model's underlying probability
     # distribution from the training corpus)
     def __init__(self, corpus):
-        print("""Your task is to implement four kinds of n-gram language models:
-      a) an (unsmoothed) unigram model (UnigramModel)
-      b) a unigram model smoothed using Laplace smoothing (SmoothedUnigramModel)
-      c) an unsmoothed bigram model (BigramModel)
-      d) a bigram model smoothed using linear interpolation smoothing (SmoothedBigramModelInt)
-      """)
+        #     print("""Your task is to implement four kinds of n-gram language models:
+        #   a) an (unsmoothed) unigram model (UnigramModel)
+        #   b) a unigram model smoothed using Laplace smoothing (SmoothedUnigramModel)
+        #   c) an unsmoothed bigram model (BigramModel)
+        #   d) a bigram model smoothed using linear interpolation smoothing (SmoothedBigramModelInt)
+        #   """)
+        self.corpus = corpus
     # enddef
 
     # Generate a sentence by drawing words according to the
@@ -157,14 +159,49 @@ class LanguageModel:
     # enddef
 # endclass
 
+
 # Unigram language model
 
 
 class UnigramModel(LanguageModel):
     def __init__(self, corpus):
-        print("Subtask: implement the unsmoothed unigram language model")
-    # endddef
-# endclass
+        super().__init__(corpus)
+        self.count = Counter(
+            [word for sentence in self.corpus for word in sentence])
+
+    def generateSentence(self):
+        sentence = [start]
+
+        while True:
+            word = random.choice(list(self.count.keys()))
+            if word == end:
+                break
+            sentence.append(word)
+            if len(sentence) > 20:
+                break
+
+        return sentence[1:]
+
+    def getSentenceProbability(self, sen):
+        probability = 1.0  # Initialize probability to 1
+        total_count = sum(self.count.values())
+
+        for word in sen:
+            probability *= self.count[word] / total_count
+
+        return probability
+
+    def getCorpusPerplexity(self, corpus):
+        total_probability = 1.0
+        total_words = 0
+
+        for sentence in corpus:
+            sen_probability = self.getSentenceProbability(sentence)
+            total_probability *= sen_probability
+            total_words += len(sentence)
+
+        perplexity = math.exp(-total_probability / total_words)
+        return perplexity
 
 # Smoothed unigram language model (use laplace for smoothing)
 
@@ -259,8 +296,15 @@ if __name__ == "__main__":
     posTestCorpus = preprocessTest(vocab, posTestCorpus)
     negTestCorpus = preprocessTest(vocab, negTestCorpus)
 
-    # # Run sample unigram dist code
-    # unigramDist = UnigramDist(trainCorpus)
-    # print("Sample UnigramDist output:")
-    # print("Probability of \"picture\": ", unigramDist.prob("picture"))
-    # print("\"Random\" draw: ", unigramDist.draw())
+    # UnigramModel
+    unigramModel = UnigramModel(trainCorpus)
+
+    generated_sentence = unigramModel.generateSentence()
+    print("Generated Sentence:", generated_sentence)
+
+    sentence_probability = unigramModel.getSentenceProbability(
+        generated_sentence)
+    print("Sentence Log Probability:", sentence_probability)
+
+    corpus_perplexity = unigramModel.getCorpusPerplexity(trainCorpus)
+    print("Corpus Perplexity:", corpus_perplexity)
